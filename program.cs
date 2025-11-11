@@ -43,12 +43,12 @@ namespace PametnaBiblioteka
 
             if (string.IsNullOrWhiteSpace(ime) || string.IsNullOrWhiteSpace(prezime) || string.IsNullOrWhiteSpace(email))
             {
-                Console.WriteLine("❌ Svi podaci su obavezni!");
+                Console.WriteLine("Svi podaci su obavezni!");
                 return;
             }
             if (!email.Contains("@"))
             {
-                Console.WriteLine("❌ Neispravan email format!");
+                Console.WriteLine(" Neispravan email format!");
                 return;
             }
 
@@ -56,13 +56,13 @@ namespace PametnaBiblioteka
             string uloga = Console.ReadLine()?.Trim();
             if (uloga.ToLower() != "administrator" && uloga.ToLower() != "clan")
             {
-                Console.WriteLine("❌ Neispravna uloga! Koristite 'Administrator' ili 'Clan'.");
+                Console.WriteLine("Neispravna uloga! Koristite 'Administrator' ili 'Clan'.");
                 return;
             }
 
             var novi = new Korisnik(nextId++, ime, prezime, email, uloga);
             korisnici.Add(novi);
-            Console.WriteLine("✅ Korisnik uspješno dodan!");
+            Console.WriteLine(" Korisnik uspješno dodan!");
         }
 
         public void AzurirajKorisnika()
@@ -71,14 +71,14 @@ namespace PametnaBiblioteka
             Console.Write("Unesite ID korisnika kojeg želite ažurirati: ");
             if (!int.TryParse(Console.ReadLine(), out int id))
             {
-                Console.WriteLine("❌ Neispravan unos!");
+                Console.WriteLine(" Neispravan unos!");
                 return;
             }
 
             var korisnik = korisnici.FirstOrDefault(k => k.Id == id);
             if (korisnik == null)
             {
-                Console.WriteLine("❌ Korisnik nije pronađen!");
+                Console.WriteLine(" Korisnik nije pronađen!");
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace PametnaBiblioteka
             {
                 if (!email.Contains("@"))
                 {
-                    Console.WriteLine("❌ Email nije validan!");
+                    Console.WriteLine(" Email nije validan!");
                     return;
                 }
                 korisnik.Email = email;
@@ -108,13 +108,13 @@ namespace PametnaBiblioteka
             {
                 if (uloga.ToLower() != "administrator" && uloga.ToLower() != "clan")
                 {
-                    Console.WriteLine("❌ Uloga nije validna!");
+                    Console.WriteLine(" Uloga nije validna!");
                     return;
                 }
                 korisnik.Uloga = uloga;
             }
 
-            Console.WriteLine("✅ Korisnik ažuriran!");
+            Console.WriteLine(" Korisnik ažuriran!");
         }
 
         public void ObrisiKorisnika()
@@ -123,26 +123,26 @@ namespace PametnaBiblioteka
             Console.Write("Unesite ID korisnika za brisanje: ");
             if (!int.TryParse(Console.ReadLine(), out int id))
             {
-                Console.WriteLine("❌ Neispravan unos!");
+                Console.WriteLine(" Neispravan unos!");
                 return;
             }
 
             var korisnik = korisnici.FirstOrDefault(k => k.Id == id);
             if (korisnik == null)
             {
-                Console.WriteLine("❌ Korisnik nije pronađen!");
+                Console.WriteLine(" Korisnik nije pronađen!");
                 return;
             }
 
             korisnici.Remove(korisnik);
-            Console.WriteLine("🗑️ Korisnik obrisan!");
+            Console.WriteLine(" Korisnik obrisan!");
         }
 
         public void PrikaziKorisnike()
         {
             if (korisnici.Count == 0)
             {
-                Console.WriteLine("📭 Nema registrovanih korisnika.");
+                Console.WriteLine(" Nema registrovanih korisnika.");
                 return;
             }
 
@@ -180,11 +180,11 @@ namespace PametnaBiblioteka
                     case "3": sistem.ObrisiKorisnika(); break;
                     case "4": sistem.PrikaziKorisnike(); break;
                     case "0": radi = false; break;
-                    default: Console.WriteLine("❌ Neispravan izbor!"); break;
+                    default: Console.WriteLine(" Neispravan izbor!"); break;
                 }
             }
 
-            Console.WriteLine("👋 Kraj programa.");
+            Console.WriteLine(" Kraj programa.");
         }
     }
 }
