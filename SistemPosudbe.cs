@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace PametnaBiblioteka
 {
-    // MODEL POSUDBE – dio sistema posudbe
     public class Posudba
     {
         public int Id { get; set; }
@@ -15,16 +14,9 @@ namespace PametnaBiblioteka
         public DateTime RokVracanja { get; set; }
         public DateTime? DatumVracanja { get; set; }
         public decimal Kazna { get; set; }
-
-        // Posudba je aktivna dok knjiga nije vraćena
         public bool Aktivna => !DatumVracanja.HasValue;
     }
 
-    // MODUL 3 – SISTEM POSUDBE
-    // Funkcionalnosti:
-    // - Posudba i vraćanje knjiga
-    // - Praćenje rokova i kazni za kašnjenje
-    // - Generisanje historije posudbi
     public class SistemPosudbe
     {
         private readonly List<Posudba> _posudbe;
@@ -33,7 +25,6 @@ namespace PametnaBiblioteka
 
         private int _nextPosudbaId = 1;
 
-        // npr. 1 KM kazne po danu kašnjenja
         private const decimal KaznaPoDanu = 1m;
 
         public SistemPosudbe(List<Korisnik> korisnici, List<Knjiga> knjige)
@@ -43,7 +34,6 @@ namespace PametnaBiblioteka
             _posudbe = new List<Posudba>();
         }
 
-        // POSUDBA KNJIGE
         public bool PosudiKnjigu(int korisnikId, int knjigaId)
         {
             var korisnik = _korisnici.FirstOrDefault(k => k.Id == korisnikId);
@@ -89,7 +79,6 @@ namespace PametnaBiblioteka
             return true;
         }
 
-        // VRAĆANJE KNJIGE + OBRAČUN KAZNE ZA KAŠNJENJE
         public bool VratiKnjigu(int korisnikId, int knjigaId)
         {
             var posudba = _posudbe
@@ -132,7 +121,6 @@ namespace PametnaBiblioteka
             return true;
         }
 
-        // PRIKAZ SVIH AKTIVNIH POSUDBI (PRAĆENJE STANJA)
         public void PrikaziAktivnePosudbe()
         {
             var aktivne = _posudbe.Where(p => p.Aktivna).ToList();
@@ -156,7 +144,6 @@ namespace PametnaBiblioteka
             }
         }
 
-        // GENERISANJE HISTORIJE POSUDBI ZA ODREĐENOG KORISNIKA
         public void PrikaziHistorijuZaKorisnika(int korisnikId)
         {
             var korisnik = _korisnici.FirstOrDefault(k => k.Id == korisnikId);
@@ -187,8 +174,6 @@ namespace PametnaBiblioteka
                     $"Kazna: {p.Kazna} KM | Status: {status}");
             }
         }
-
-        // DODATNO – ako vam za izvještaj treba direktan pristup podacima:
 
         public IReadOnlyList<Posudba> VratiSvePosudbe()
         {
