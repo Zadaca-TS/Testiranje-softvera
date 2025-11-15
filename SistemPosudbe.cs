@@ -9,7 +9,6 @@ namespace PametnaBiblioteka
         public int Id { get; set; }
         public int KorisnikId { get; set; }
         public int KnjigaId { get; set; }
-
         public DateTime DatumPosudbe { get; set; }
         public DateTime RokVracanja { get; set; }
         public DateTime? DatumVracanja { get; set; }
@@ -19,81 +18,103 @@ namespace PametnaBiblioteka
 
     public class SistemPosudbe
     {
-        private readonly List<Posudba> _posudbe;
-        private readonly List<Korisnik> _korisnici;
-        private readonly List<Knjiga> _knjige;
-
-        private int _nextPosudbaId = 1;
-
+        private readonly List<Posudba> posudbe;
+        private readonly List<Korisnik> korisnici;
+        private readonly List<Knjiga> knjige;
+        private int nextPosudbaId = 1;
         private const decimal KaznaPoDanu = 1m;
 
         public SistemPosudbe(List<Korisnik> korisnici, List<Knjiga> knjige)
         {
-            _korisnici = korisnici ?? throw new ArgumentNullException(nameof(korisnici));
-            _knjige = knjige ?? throw new ArgumentNullException(nameof(knjige));
-            _posudbe = new List<Posudba>();
+            this.korisnici = korisnici;
+            this.knjige = knjige;
+            posudbe = new List<Posudba>();
         }
 
-        public bool PosudiKnjigu(int korisnikId, int knjigaId)
+        public void PosudiKnjigu()
         {
-            var korisnik = _korisnici.FirstOrDefault(k => k.Id == korisnikId);
-            if (korisnik == null)
+            Console.Write("Unesite ID korisnika: ");
+            if (!int.TryParse(Console.ReadLine(), out int korisnikId))
             {
-                Console.WriteLine("❌ Korisnik sa zadatim ID nije pronađen.");
-                return false;
+                Console.WriteLine("Neispravan unos ID korisnika!");
+                return;
             }
 
-            var knjiga = _knjige.FirstOrDefault(k => k.Id == knjigaId);
+            var korisnik = korisnici.FirstOrDefault(k => k.Id == korisnikId);
+            if (korisnik == null)
+            {
+                Console.WriteLine("Korisnik nije pronađen!");
+                return;
+            }
+
+            Console.Write("Unesite ID knjige: ");
+            if (!int.TryParse(Console.ReadLine(), out int knjigaId))
+            {
+                Console.WriteLine("Neispravan unos ID knjige!");
+                return;
+            }
+
+            var knjiga = knjige.FirstOrDefault(k => k.Id == knjigaId);
             if (knjiga == null)
             {
-                Console.WriteLine("❌ Knjiga sa zadatim ID nije pronađena.");
-                return false;
+                Console.WriteLine("Knjiga nije pronađena!");
+                return;
             }
 
             if (!knjiga.Dostupna)
             {
-                Console.WriteLine("❌ Knjiga trenutno nije dostupna za posudbu.");
-                return false;
+                Console.WriteLine("Knjiga trenutno nije dostupna za posudbu.");
+                return;
             }
 
-            var datumPosudbe = DateTime.Now;
-            var rok = datumPosudbe.AddDays(14); // npr. rok vraćanja 14 dana
+            var sada = DateTime.Now;
+            var rok = sada.AddDays(14);
 
-            var novaPosudba = new Posudba
+            var posudba = new Posudba
             {
-                Id = _nextPosudbaId++,
+                Id = nextPosudbaId++,
                 KorisnikId = korisnik.Id,
                 KnjigaId = knjiga.Id,
-                DatumPosudbe = datumPosudbe,
+                DatumPosudbe = sada,
                 RokVracanja = rok,
                 DatumVracanja = null,
                 Kazna = 0
             };
 
-            _posudbe.Add(novaPosudba);
+            posudbe.Add(posudba);
             knjiga.Dostupna = false;
 
-            Console.WriteLine($"✅ Knjiga \"{knjiga.Naslov}\" je posuđena korisniku {korisnik.Ime} {korisnik.Prezime}.");
-            Console.WriteLine($"   Rok za vraćanje: {rok:dd.MM.yyyy}.");
-
-            return true;
+            Console.WriteLine($"Knjiga \"{knjiga.Naslov}\" je posuđena korisniku {korisnik.Ime} {korisnik.Prezime}.");
+            Console.WriteLine($"Rok za vraćanje: {rok:dd.MM.yyyy}.");
         }
 
-        public bool VratiKnjigu(int korisnikId, int knjigaId)
+        public void VratiKnjigu()
         {
-            var posudba = _posudbe
-                .LastOrDefault(p => p.KorisnikId == korisnikId &&
-                                    p.KnjigaId == knjigaId &&
-                                    p.Aktivna);
+            Console.Write("Unesite ID korisnika: ");
+            if (!int.TryParse(Console.ReadLine(), out int korisnikId))
+            {
+                Console.WriteLine("Neispravan unos ID korisnika!");
+                return;
+            }
+
+            Console.Write("Unesite ID knjige: ");
+            if (!int.TryParse(Console.ReadLine(), out int knjigaId))
+            {
+                Console.WriteLine("Neispravan unos ID knjige!");
+                return;
+            }
+
+            var posudba = posudbe
+                .LastOrDefault(p => p.KorisnikId == korisnikId && p.KnjigaId == knjigaId && p.Aktivna);
 
             if (posudba == null)
             {
-                Console.WriteLine("❌ Nije pronađena aktivna posudba za datog korisnika i knjigu.");
-                return false;
+                Console.WriteLine("Nije pronađena aktivna posudba za zadate podatke.");
+                return;
             }
 
-            var knjiga = _knjige.FirstOrDefault(k => k.Id == knjigaId);
-            var korisnik = _korisnici.FirstOrDefault(k => k.Id == korisnikId);
+            var knjiga = knjige.FirstOrDefault(k => k.Id == knjigaId);
+            var korisnik = korisnici.FirstOrDefault(k => k.Id == korisnikId);
 
             var danas = DateTime.Now;
             posudba.DatumVracanja = danas;
@@ -107,87 +128,79 @@ namespace PametnaBiblioteka
             if (knjiga != null)
                 knjiga.Dostupna = true;
 
-            Console.WriteLine($"📚 Knjiga \"{knjiga?.Naslov}\" vraćena {danas:dd.MM.yyyy} od strane {korisnik?.Ime} {korisnik?.Prezime}.");
+            Console.WriteLine($"Knjiga \"{knjiga?.Naslov}\" vraćena {danas:dd.MM.yyyy} od strane {korisnik?.Ime} {korisnik?.Prezime}.");
 
             if (posudba.Kazna > 0)
             {
-                Console.WriteLine($"💰 Korisnik kasni sa vraćanjem. Kazna iznosi: {posudba.Kazna} KM.");
+                Console.WriteLine($"Korisnik kasni sa vraćanjem. Kazna iznosi: {posudba.Kazna} KM.");
             }
             else
             {
-                Console.WriteLine("✅ Nema kazne za kašnjenje.");
+                Console.WriteLine("Nema kazne za kašnjenje.");
             }
-
-            return true;
         }
 
         public void PrikaziAktivnePosudbe()
         {
-            var aktivne = _posudbe.Where(p => p.Aktivna).ToList();
+            var aktivne = posudbe.Where(p => p.Aktivna).ToList();
 
             if (!aktivne.Any())
             {
-                Console.WriteLine("📭 Nema aktivnih posudbi.");
+                Console.WriteLine("Nema aktivnih posudbi.");
                 return;
             }
 
-            Console.WriteLine("=== AKTIVNE POSUDBE ===");
+            Console.WriteLine("\n--- Aktivne posudbe ---");
             foreach (var p in aktivne)
             {
-                var korisnik = _korisnici.FirstOrDefault(k => k.Id == p.KorisnikId);
-                var knjiga = _knjige.FirstOrDefault(k => k.Id == p.KnjigaId);
+                var korisnik = korisnici.FirstOrDefault(k => k.Id == p.KorisnikId);
+                var knjiga = knjige.FirstOrDefault(k => k.Id == p.KnjigaId);
 
-                Console.WriteLine(
-                    $"[PosudbaID: {p.Id}] Korisnik: {korisnik?.Ime} {korisnik?.Prezime} | " +
-                    $"Knjiga: \"{knjiga?.Naslov}\" | " +
-                    $"Posuđeno: {p.DatumPosudbe:dd.MM.yyyy} | Rok: {p.RokVracanja:dd.MM.yyyy}");
+                Console.WriteLine($"[{p.Id}] {korisnik?.Ime} {korisnik?.Prezime} - \"{knjiga?.Naslov}\" | Posuđeno: {p.DatumPosudbe:dd.MM.yyyy} | Rok: {p.RokVracanja:dd.MM.yyyy}");
             }
+            Console.WriteLine();
         }
 
-        public void PrikaziHistorijuZaKorisnika(int korisnikId)
+        public void PrikaziHistorijuZaKorisnika()
         {
-            var korisnik = _korisnici.FirstOrDefault(k => k.Id == korisnikId);
-            if (korisnik == null)
+            Console.Write("Unesite ID korisnika: ");
+            if (!int.TryParse(Console.ReadLine(), out int korisnikId))
             {
-                Console.WriteLine("❌ Korisnik nije pronađen.");
+                Console.WriteLine("Neispravan unos ID korisnika!");
                 return;
             }
 
-            var historija = _posudbe.Where(p => p.KorisnikId == korisnikId).ToList();
+            var korisnik = korisnici.FirstOrDefault(k => k.Id == korisnikId);
+            if (korisnik == null)
+            {
+                Console.WriteLine("Korisnik nije pronađen!");
+                return;
+            }
+
+            var historija = posudbe.Where(p => p.KorisnikId == korisnikId).ToList();
             if (!historija.Any())
             {
                 Console.WriteLine($"Korisnik {korisnik.Ime} {korisnik.Prezime} nema posudbi u historiji.");
                 return;
             }
 
-            Console.WriteLine($"=== HISTORIJA POSUDBI ZA: {korisnik.Ime} {korisnik.Prezime} ===");
+            Console.WriteLine($"\n--- Historija posudbi za: {korisnik.Ime} {korisnik.Prezime} ---");
             foreach (var p in historija)
             {
-                var knjiga = _knjige.FirstOrDefault(k => k.Id == p.KnjigaId);
+                var knjiga = knjige.FirstOrDefault(k => k.Id == p.KnjigaId);
                 string status = p.Aktivna ? "AKTIVNA" : "ZAVRŠENA";
 
                 Console.WriteLine(
-                    $"Knjiga: \"{knjiga?.Naslov}\" | " +
-                    $"Posuđeno: {p.DatumPosudbe:dd.MM.yyyy} | " +
-                    $"Rok: {p.RokVracanja:dd.MM.yyyy} | " +
+                    $"\"{knjiga?.Naslov}\" | Posuđeno: {p.DatumPosudbe:dd.MM.yyyy} | Rok: {p.RokVracanja:dd.MM.yyyy} | " +
                     $"Vraćeno: {(p.DatumVracanja.HasValue ? p.DatumVracanja.Value.ToString("dd.MM.yyyy") : "-")} | " +
                     $"Kazna: {p.Kazna} KM | Status: {status}");
             }
+            Console.WriteLine();
         }
 
-        public IReadOnlyList<Posudba> VratiSvePosudbe()
+        public List<Posudba> VratiSvePosudbe()
         {
-            return _posudbe.AsReadOnly();
-        }
-
-        public List<Posudba> VratiAktivnePosudbe()
-        {
-            return _posudbe.Where(p => p.Aktivna).ToList();
-        }
-
-        public List<Posudba> VratiHistorijuPosudbiZaKorisnika(int korisnikId)
-        {
-            return _posudbe.Where(p => p.KorisnikId == korisnikId).ToList();
+            return posudbe;
         }
     }
 }
