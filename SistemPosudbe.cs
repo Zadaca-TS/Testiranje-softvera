@@ -21,14 +21,15 @@ namespace PametnaBiblioteka
         private readonly List<Posudba> posudbe;
         private readonly List<Korisnik> korisnici;
         private readonly List<Knjiga> knjige;
-        private int nextPosudbaId = 1;
+        private int nextPosudbaId;
         private const decimal KaznaPoDanu = 1m;
 
-        public SistemPosudbe(List<Korisnik> korisnici, List<Knjiga> knjige)
+        public SistemPosudbe(List<Korisnik> korisnici, List<Knjiga> knjige, List<Posudba> postojecePosudbe = null)
         {
             this.korisnici = korisnici;
             this.knjige = knjige;
-            posudbe = new List<Posudba>();
+            posudbe = postojecePosudbe ?? new List<Posudba>();
+            nextPosudbaId = posudbe.Any() ? posudbe.Max(p => p.Id) + 1 : 1;
         }
 
         public void PosudiKnjigu()
@@ -156,7 +157,7 @@ namespace PametnaBiblioteka
                 var korisnik = korisnici.FirstOrDefault(k => k.Id == p.KorisnikId);
                 var knjiga = knjige.FirstOrDefault(k => k.Id == p.KnjigaId);
 
-                Console.WriteLine($"[{p.Id}] {korisnik?.Ime} {korisnik?.Prezime} - \"{knjiga?.Naslov}\" | Posuđeno: {p.DatumPosudbe:dd.MM.yyyy} | Rok: {p.RokVracanja:dd.MM.yyyy}");
+                Console.WriteLine($"[{p.Id}] {korisnik?.Ime} {korisnik?.Prezime} - \"{knjiga?.Naslov}\" | Posuđeno: {p.DatumPosudbe:dd.MM.yyyy} | Rok: {p.RokVracanja:dd.MM.yYYY}");
             }
             Console.WriteLine();
         }
